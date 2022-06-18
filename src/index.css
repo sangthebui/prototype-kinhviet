@@ -11,3 +11,19 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.grid .column{
+    content: '';
+    display: block;
+}
+
+
+.editor_toolbar {
+    margin: 0 !important; 
+    /* border: 2px solid #2185d0;
+    border-radius: 10px; */
+}
+
+.output_console {
+    height: 20vh;
+}
