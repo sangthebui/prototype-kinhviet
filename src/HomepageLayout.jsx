@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable react/no-multi-comp */
 
-import React, { useState}  from 'react'
+import React, {useEffect, useState} from 'react'
 import {
   Button,
   Container,
@@ -13,28 +13,106 @@ import {
   Dropdown,
   Message,
 } from 'semantic-ui-react'
-
+import {interpret, standard_output, Parser} from "viet-ngu";
 import MainEditor from './MainEditor';
-import VM, { standard_output } from './kinh_ngu/3vm';
+import { introduction, variables, operators, functions,
+    controlFlow, loops, arrays, classes
+} from './lessons/';
 
 
 const options = [
-    { key: 'Chào bạn', text: 'Chào bạn', value: 'chao ban' },
-    { key: 'Khai báo',  text: 'Khai báo', value: 'Khai bao' },
-    { key: 'Câu lệnh: nếu', text: 'Câu lệnh: nếu', value: 'cau len neu' },
+    { key: 'Bắt Đầu', text: 'Bắt Đầu', value: 'Bắt Đầu' },
+    { key: 'Khai báo',  text: 'Khai báo', value: 'Khai báo' },
+    { key: 'Phép Toán',  text: 'Phép Toán', value: 'Phép toán' },
+    { key: 'Hàm',  text: 'Hàm', value: 'Hàm' },
+    { key: 'Rẻ Nhánh', text: 'Rẻ Nhánh', value: 'Rẻ Nhánh' },
+    { key: 'Vòng Lặp', text: 'Vòng Lặp', value: 'Vòng Lặp' },
+    { key: 'Mảng', text: 'Mảng', value: 'Mảng' },
+    { key: 'Lớp', text: 'Lớp', value: 'Lớp' },
   ]
-
-const vm = new VM();
 
 const HomepageLayout = () => {
 
     const [ source, setSource ] = useState("");
-    const [ output, setOutput] = useState("");
+    const [ output, setOutput] = useState([]);
+    const [ lesson, setLesson] = useState("chao ban");
+    const parser = new Parser();
 
-    const onClick = () => {
-        vm.interpret(source);
+    useEffect(() => {
+       setSource(introduction);
+    }, [introduction]);
 
-        setOutput( standard_output.join("\n"));
+
+    const play = () => {
+        //reset standard_output
+        standard_output.splice(0, standard_output.length);
+        setOutput([...standard_output]);
+        interpret(source);
+        setOutput([...standard_output]);
+
+    }
+
+    const stop = () => {
+        setSource("");
+        standard_output.splice(0, standard_output.length);
+        setOutput([...standard_output]);
+    }
+
+    const format = () => {
+        const result = parser
+            .setSource(source)
+            .generateTokens()
+            .transformTokensValue()
+            .returnAllTokensAsText();
+
+        setSource(result);
+    }
+
+    const selectLesson = (e, {value}) => {
+        switch(value){
+            case 'Bắt Đầu': {
+                setSource(introduction);
+                setLesson('Bắt Đầu');
+                break;
+            }
+            case 'Khai báo': {
+                setSource(variables);
+                setLesson('Khai báo');
+                break;
+            }
+            case 'Phép toán': {
+                setSource(operators);
+                setLesson('Phép toán');
+                break;
+            }
+            case 'Hàm': {
+                setSource(functions);
+                setLesson('Hàm');
+                break;
+            }
+            case 'Rẻ Nhánh' : {
+                setSource(controlFlow);
+                setLesson('Rẻ Nhánh');
+                break;
+            }
+            case 'Vòng Lặp': {
+                setSource(loops);
+                setLesson('Vòng Lặp');
+                break;
+            }
+            case 'Mảng': {
+                setSource(arrays);
+                setLesson('Mảng');
+                break;
+            }
+            case 'Lớp': {
+                setSource(classes);
+                setLesson('Lớp');
+                break;
+            }
+            default:
+                break;// unreachable
+        }
     }
 
     return (
@@ -52,25 +130,29 @@ const HomepageLayout = () => {
             <Grid className="editor_toolbar">
                 <Grid.Column floated='left' width={5}>
                     <Header as='h1' color='blue'>
-                        Kinh Ngữ Nguyên Mẫu
+                        Nguyên Mẫu
                     </Header>
                 </Grid.Column>
 
-                <Grid.Column floated='right' width={5} >
-                    <Button inverted color='green' compact onClick={onClick}>
+                <Grid.Column floated='right' width={8} >
+                    <Button inverted color='green' compact onClick={format}>
+                        <Icon name='edit' />định dạng
+                    </Button>
+                    <Button inverted color='green' compact onClick={play}>
                         <Icon name='play' /> Chạy 
                     </Button>
 
-                    <Button inverted color='red' compact >
-                        <Icon name='stop' />Ngung
+                    <Button inverted color='red' compact onClick={stop}>
+                        <Icon name='stop' />quét trống
                     </Button>
 
                     <Button.Group inverted >
-                        <Button compact >Bài viếc</Button>
+                        <Button compact >Bài viết: {lesson}</Button>
                         <Dropdown
                             className='button icon'
                             floating
                             options={options}
+                            onChange={selectLesson}
                             trigger={<></>}
                             />
                     </Button.Group>
@@ -78,10 +160,13 @@ const HomepageLayout = () => {
             </Grid>
 
             <Divider hidden />
-        <MainEditor setSource={setSource}/>
+        <MainEditor setSource={setSource} value={source}/>
             
     <Message warning attached='bottom' size='massive' className="output_console">
-        <Message.Header>{output}</Message.Header>
+        <Message.Header>Console Output:</Message.Header>
+            <Message.Content>
+                {output.map((each) => each)}
+            </Message.Content>
         </Message>
 
     </Container>

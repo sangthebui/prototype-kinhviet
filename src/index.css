@@ -26,4 +26,5 @@ code {
 
 .output_console {
     height: 20vh;
+    overflow-y: scroll;
 }

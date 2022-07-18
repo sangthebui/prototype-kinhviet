@@ -3,21 +3,26 @@ import Editor  from "@monaco-editor/react";
 
 let kinh_ngu = "kinh_ngu";
 
-let keywords_bland = [
-    "va", "lop", "khac", "sai", "cho", "ham", "neu", "nil", "hoac", "viet", "tra",
- "sieu", "nay", "dung", "bien", "khi", "luc"
-];
+let keywords_bland = ["va", "nghi", "truong_hop", "lop", "tiep", "khac",
+    "theo", "xuat", "khiem_dien", "sai", "cho", "tu_day", "ham", "neu",
+    "nhap", "vo_gia", "hoac", "viet", "tra", "goc", "doi", "nay", "dung", "bien", "trong_khi", "mang"
+]
+let keywords_original = [ "và", "nghỉ", "trường_hợp", "lớp", "tiếp", "khác",
+    "theo", "xuất", "khiếm_diện", "sai", "cho",
+    "từ_đây", "hàm", "nếu",  "nhập", "vô_giá", "hoặc", "viết", "trả", "gốc",
+    "đởi", "này", "đúng", "biến", "trông_khi"];
 
+let keywords = [...keywords_bland, ...keywords_original]
 let syntaxError = {
     message: "syntaxError",
     line: 4,
     column: 5,
     length: 5,
 }
-
+let newRegex = /[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ_]+[\w$]*/
 let markers = [];//TODO add error syntax highlighting
 
-const MainEditor = ({setSource}) => {
+const MainEditor = ({setSource, value}) => {
 
     const editorRef = useRef(null);
 
@@ -27,24 +32,24 @@ const MainEditor = ({setSource}) => {
         //add syntax highlighting for kinh ngu
         monaco.languages.register({id: kinh_ngu});
         monaco.languages.setMonarchTokensProvider(kinh_ngu, {
-            keywords: keywords_bland,
+            keywords: keywords,
             tokenizer: {
                 root: [
-                [/@?[a-zA-Z][\w$]*/, {
-                    cases: {
-                        "@keywords": "keyword",
-                        "@default": "variable",
-                    }
-                }],
-                [/".*?"/, "string"],
-                [/\//, "comment"],
+                    [newRegex, {
+                        cases: {
+                            "@keywords": "keyword",
+                            "@default": "variable",
+                        }
+                    }],
+                    [/".*?"/, "string"],
+                    [/\//, "comment"],
                 ]
             }
         });
 
         monaco.languages.registerCompletionItemProvider(kinh_ngu, {
             provideCompletionItems: (model, position) => {
-              const suggestions = [  ...keywords_bland.map(k => {
+              const suggestions = [  ...keywords.map(k => {
                     return {
                         label: k,
                         kind: monaco.languages.CompletionItemKind.Keyword,
@@ -73,7 +78,7 @@ const MainEditor = ({setSource}) => {
             base: 'vs',
             inherit: true,
             rules: [
-                { background: 'EDF9FA' , },
+                { background: '#EDF9FA' , },
                 { token: "keyword", foreground: "#0000FF", fontStyle: "bold"},
                 { token: "comment", foreground: "#999999"},
                 { token: "string", foreground: "#009966"},
@@ -90,6 +95,9 @@ const MainEditor = ({setSource}) => {
             }
         });
         monaco.editor.setTheme('myTheme');
+
+        //focus the editor
+        editorRef.current.focus();
     }
 
 
@@ -102,6 +110,7 @@ const MainEditor = ({setSource}) => {
             onMount={handleEditorDidMount}
             onChange={ value => setSource(value)}
                 //  onValidate={handleEditorValidation}
+            value={value}
             ></Editor>
     )
    
