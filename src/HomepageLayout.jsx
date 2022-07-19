@@ -31,6 +31,14 @@ const options = [
     { key: 'Lớp', text: 'Lớp', value: 'Lớp' },
   ]
 
+const MessageContent = ({output}) => {
+    return (
+        <Message.Content>
+            {output.map((each) => <p>{each}</p>)}
+        </Message.Content>
+    )
+}
+
 const HomepageLayout = () => {
 
     const [ source, setSource ] = useState("");
@@ -115,6 +123,7 @@ const HomepageLayout = () => {
         }
     }
 
+
     return (
         <Container>
             <Menu
@@ -164,9 +173,7 @@ const HomepageLayout = () => {
             
     <Message warning attached='bottom' size='massive' className="output_console">
         <Message.Header>Console Output:</Message.Header>
-            <Message.Content>
-                {output.map((each) => each)}
-            </Message.Content>
+        <MessageContent output={output} />
         </Message>
 
     </Container>
